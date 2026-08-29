@@ -9,6 +9,7 @@
 #include "convai_config_file.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define BRIDGE_DEFAULT_BOT_ID         "your_agent_id"       // <- 替换为实际的 agent_id
@@ -71,6 +72,14 @@ const char *bridge_build_config_json(char *buf, size_t buf_size,
 
     const char *server_url = cfg_or("server_url", NULL);
 
+    const char *codec_str = cfg_or("codec", "0");
+    char *codec_end = NULL;
+    long codec_value = strtol(codec_str, &codec_end, 10);
+    if (codec_end == codec_str || *codec_end != '\0' ||
+        codec_value < 0 || codec_value > 4) {
+        codec_value = 0;
+    }
+
     int n;
 
     if (api_key != NULL && api_key[0] != '\0') {
@@ -115,8 +124,7 @@ const char *bridge_build_config_json(char *buf, size_t buf_size,
                 "\"codec\":%d"
             "}"
         "}"
-    "}", 0);
+    "}", (int)codec_value);
     (void)n; /* truncation is acceptable — engine will reject malformed JSON */
     return buf;
 }
-
